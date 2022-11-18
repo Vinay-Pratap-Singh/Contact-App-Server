@@ -43,3 +43,17 @@ exports.displayContact = async (req, res) => {
     res.send("Failed to display contact\n",error);
   }
 }
+
+// update an existing contact
+exports.updateContact = async (req, res) => {
+  try {
+    const { existingContact, name, phone } = req.body;
+    
+    const updatedContact = await Contact.findOneAndUpdate({ phone: existingContact }, { name, phone });
+    
+    if(updatedContact) res.send("Contact Updated Succesfully");
+    else res.send("Contact Updation Failed");
+  } catch (error) {
+    res.send(error);
+  }
+}
