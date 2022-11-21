@@ -60,10 +60,7 @@ exports.deleteContact = async (req, res) => {
 exports.displayContact = async (req, res) => {
   try {
     const data = await Contact.find();
-    res.json({
-      status: 200,
-      data,
-    });
+    res.send(data);
   } catch (error) {
     res.json({
       status: 500,
@@ -88,14 +85,14 @@ exports.updateContact = async (req, res) => {
     else {
       res.json({
         status: 500,
-        message:"Contact Deletion Failed"
+        message:"Contact Updation Failed"
       })
     }
   } catch (error) {
     res.json({
       status: 500,
-      message: "Contact Deletion Failed",
-      error
+      message: "Contact Updation Failed",
+      error:error
     })
   }
 };
