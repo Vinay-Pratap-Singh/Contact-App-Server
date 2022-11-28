@@ -8,7 +8,7 @@ require("./database/connect");
 
 app.use(express.json());
 app.use(cors({
-    origin: "https://contact-app-harvi.netlify.app/"
+    origin: "netlify"
 }));
 
 // importing the contact routes
