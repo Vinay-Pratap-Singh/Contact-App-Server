@@ -8,7 +8,7 @@ require("./database/connect");
 
 app.use(express.json());
 app.use(cors({
-    origin: "netlify"
+    origin: "*"
 }));
 
 // importing the contact routes
