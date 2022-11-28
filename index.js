@@ -7,9 +7,7 @@ const port = process.env.PORT || 5000;
 require("./database/connect");
 
 app.use(express.json());
-app.use(cors({
-    origin: "*"
-}));
+app.use(cors());
 
 // importing the contact routes
 const route = require("./route/contactRoute");
