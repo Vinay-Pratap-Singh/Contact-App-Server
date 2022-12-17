@@ -1,98 +1,58 @@
-const Contact = require("../model/contact");
+const User = require("../model/user");
 
-// add the contact
+// function to add new contact
 exports.addContact = async (req, res) => {
-  const { name, phone } = req.body;
-  const checkPhone = await Contact.findOne({ phone });
+  const id = req.id;
+  let { name, phone } = req.body;
 
+  // checking that the name and number is empty or not
   if (!name || !phone) {
-    res.json({
-      status: 400,
-      message: "Please fill all the required fields",
-    });
-  } else if (checkPhone) {
-    res.json({
-      status: 400,
-      message: "Number already exists",
-    });
-  } else if (phone.toString().length !== 10) {
-    res.json({
-      status: 400,
-      message: "Number length should be 10",
-    });
-  } else {
-    try {
-      const newContact = new Contact({ name, phone });
-      await newContact.save();
-      res.send("Contact Created Succesfully");
-    } catch (error) {
-      res.send("Contact Creation Failed");
-    }
+    return res.status(400).json({
+      success: false,
+      message:"All fields are mandatory"
+    })
   }
-};
 
-// delete the contact
-exports.deleteContact = async (req, res) => {
+  let myUser;
   try {
-    const { id } = req.body;
-    const deletePhone = await Contact.findByIdAndDelete({ _id:id });
-    if (deletePhone) {
-      res.json({
-        status: 200,
-        message: "Number Deleted Succesfully",
-      });
-    } else {
-      res.json({
-        status: 400,
-        message: `Number ${phone} Not Found`,
-      });
-    }
+    myUser = await User.findById({ _id: id });
   } catch (error) {
-    res.json({
-      status: 500,
-      message: "Deletion Failed",
-      error: error,
+    return res.status(400).json({
+      success: false,
+      message: "User not found",
     });
   }
-};
 
-// display all the contact
-exports.displayContact = async (req, res) => {
-  try {
-    const data = await Contact.find();
-    res.send(data);
-  } catch (error) {
-    res.json({
-      status: 500,
-      message: "Failed to display data",
-    });
+  // if user does not exist
+  if (!myUser) {
+   return res.status(200).json({
+      success: false,
+      message: "User not found",
+    })
   }
-};
 
-// update an existing contact
-exports.updateContact = async (req, res) => {
+  // creating the new contact 
+  const newContact = { name, phone };
+
+  // adding the new contact to the user list
+  myUser.contact.push(newContact);
+
+  // saving the new data into the database
   try {
-    const { id, name, phone } = req.body;
-
-    const updatedContact = await Contact.findByIdAndUpdate({_id:id},{name,phone});
-
-    if (updatedContact) {
-      res.json({
-        status: 200,
-        message:"Contact Updated Succesfully"
-      })
-    }
-    else {
-      res.json({
-        status: 500,
-        message:"Contact Updation Failed"
-      })
-    }
+    await myUser.save();
+    return res.status(200).json({
+      success: true,
+      message:"New contact created"
+    })
   } catch (error) {
-    res.json({
-      status: 500,
-      message: "Contact Updation Failed",
-      error:error
+    res.status(500).json({
+      success: false,
+      message:"Failed to save new contact"
     })
   }
 };
+
+// function to delete the individual contact
+exports.deleteContact = async (req, res) => {
+  
+}

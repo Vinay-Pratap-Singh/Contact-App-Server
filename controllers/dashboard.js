@@ -1,4 +1,4 @@
-const Contact=require("../model/contact")
+const Contact=require("../model/user")
 exports.dashboard = async (req, res) => {
   const id = req.id;
   let userData;
