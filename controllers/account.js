@@ -1,6 +1,7 @@
 const User = require("../model/user");
 const bcrpyt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { findByIdAndDelete } = require("../model/user");
 
 // function for creating the new user account
 exports.signup = async (req, res) => {
@@ -119,4 +120,39 @@ exports.login = async (req, res) => {
     message: "Login Succesfully",
     data: userExist,
   });
+};
+
+// function for log out user account
+exports.logout = async (req, res) => {
+  res.cookie("token", null, {
+    expiresIn: new Date(Date.now()),
+    httpOnly: true,
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Logout succesfully",
+  });
+};
+
+// function for deleting the user account
+exports.deleteUser = async (req, res) => {
+  // getting the id of the user
+  const id = req.id;
+
+  // deleting the user if exist
+  try {
+    await User.findByIdAndDelete({ _id: id });
+
+    return res.status(200).json({
+      success: true,
+      message: "Account deleted succesfully",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "Failed to delete user account",
+      error,
+    });
+  }
 };
