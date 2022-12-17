@@ -1,7 +1,6 @@
 const User = require("../model/user");
 const bcrpyt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { findByIdAndDelete } = require("../model/user");
 
 // function for creating the new user account
 exports.signup = async (req, res) => {
@@ -149,10 +148,65 @@ exports.deleteUser = async (req, res) => {
       message: "Account deleted succesfully",
     });
   } catch (error) {
-    return res.status(400).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to delete user account",
       error,
     });
   }
 };
+
+// function for changing user password
+exports.changePassword = async (req, res) => {
+  const id = req.id;
+
+  // getting the new password
+  const { password } = req.body;
+
+  // checking for the user
+  let myUser;
+  try {
+    myUser = await User.findById({ _id: id });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  // if user does not exist
+  if (!myUser) {
+    return res.status(200).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  // if user exists, then change the password
+  const hashedPassword = bcrpyt.hashSync(password, 15);
+
+  // changing the password
+  myUser.password = hashedPassword;
+
+  // saving the new data inside database
+  try {
+    await myUser.save();
+
+    // expiring the token
+    res.cookie("token", null, {
+      expiresIn: new Date(Date.now()),
+      httpOnly: true,
+    });
+  
+    return res.status(200).json({
+      success: true,
+      message: "Password changed. Login again",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to change the password",
+      error
+    })
+  }
+}

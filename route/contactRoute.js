@@ -1,5 +1,5 @@
 const express = require("express");
-const { signup, login, logout, deleteUser } = require("../controllers/account");
+const { signup, login, logout, deleteUser, changePassword } = require("../controllers/account");
 const {
   addContact,
   deleteContact,
@@ -14,6 +14,7 @@ Router.post("/signup", signup);
 Router.post("/login", login);
 Router.get("/logout", auth, logout);
 Router.get("/deleteuser", auth, deleteUser);
+Router.patch("/changepassword", auth, changePassword);
 
 // contacts route
 Router.post("/addcontact", auth, addContact);
