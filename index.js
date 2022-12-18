@@ -2,14 +2,27 @@ require('dotenv').config();
 const cors = require("cors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const cloudinary = require("cloudinary").v2;
+const fileupload=require("express-fileupload")
 const app = express();
 
 const port = process.env.PORT || 5000;
 require("./database/connect");
 
+// configuring the cloudninary 
+cloudinary.config({ 
+    cloud_name: process.env.CLOUD_NAME, 
+    api_key: process.env.API_KEY, 
+    api_secret: process.env.API_SECRET,
+    secure: true
+  });
+
 app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
+app.use(fileupload({
+    useTempFiles:true
+}))
 
 // importing the contact routes
 const route = require("./route/contactRoute");

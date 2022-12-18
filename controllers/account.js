@@ -1,10 +1,19 @@
 const User = require("../model/user");
 const bcrpyt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary");
 
 // function for creating the new user account
 exports.signup = async (req, res) => {
   let { name, email, phone, password } = req.body;
+
+  // getting the profile photo image
+  let photo = undefined;
+  if (req.files) {
+    photo = req.files.photo;
+  }
+
+  let photoUrl = undefined;
 
   // check for empty field
   if (!name || !email || !phone || !password) {
@@ -31,14 +40,33 @@ exports.signup = async (req, res) => {
     });
   }
 
+  // check user send profile photo or not
+  if (!photo) {
+    photoUrl = "";
+  } else {
+    // saving the image on cloudinary and getting the link
+    try {
+      const isUploaded = await cloudinary.uploader.upload(photo.tempFilePath);
+      photoUrl = isUploaded.url;
+      
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to upload image",
+        error,
+      });
+    }
+  }
+
   // encypting the password before saving
   const hashedPassword = bcrpyt.hashSync(password, 15);
 
   const newUser = new User({
-    name: name.toLowerCase(),
-    email: email.toLowerCase(),
+    name: name,
+    email: email,
     phone,
     password: hashedPassword,
+    photo: photoUrl,
   });
 
   // saving the new user
@@ -49,6 +77,13 @@ exports.signup = async (req, res) => {
       message: "User registered Succesfully",
     });
   } catch (error) {
+    if (photoUrl) {
+      const url = photoUrl.split("/");
+      const image = url[url.length - 1];
+      const imageName = image.split(".");
+      await cloudinary.uploader.destroy(imageName[0]);
+    }
+
     return res.status(500).json({
       success: false,
       message: "Failed to save user",
@@ -197,7 +232,7 @@ exports.changePassword = async (req, res) => {
       expiresIn: new Date(Date.now()),
       httpOnly: true,
     });
-  
+
     return res.status(200).json({
       success: true,
       message: "Password changed. Login again",
@@ -206,7 +241,7 @@ exports.changePassword = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to change the password",
-      error
-    })
+      error,
+    });
   }
-}
+};

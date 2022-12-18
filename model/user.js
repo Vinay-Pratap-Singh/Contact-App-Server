@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minlength: [8, "Password must be atleast 8 characters long"],
   },
+  photo: {
+    type: String,
+  },
   contact: [
     {
       name: {
@@ -41,6 +44,9 @@ const userSchema = new mongoose.Schema({
         minlength: [10, "Length should be 10"],
         maxlength: [10, "Length should be 10"],
       },
+      photo: {
+        type:"String"
+      }
     },
   ],
 });
