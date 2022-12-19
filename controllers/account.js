@@ -267,3 +267,86 @@ exports.changePassword = async (req, res) => {
     });
   }
 };
+
+// function for changing user profile image
+exports.changeUserImage = async (req, res) => {
+  const id = req.id;
+
+  // getting the new image from user
+  const {photo} = req.files;
+
+  if (!photo) {
+    return res.status(400).json({
+      success: false,
+      message:"Upload your image"
+    })
+  }
+
+  let userExist;
+  // finding the user in db
+  try {
+    userExist = await User.findOne({ _id:id });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error,
+    });
+  }
+
+  // if user does not exist
+  if (!userExist) {
+    return res.status(400).json({
+      success: false,
+      message: "User does not exist",
+    });
+  }
+
+  // getting the old image link to delete
+  const oldPhoto = userExist.photo;
+    
+  // deleting the old image from cloudinary
+ try {
+   if (oldPhoto) {
+    const url = oldPhoto.split("/");
+    const image = url[url.length - 1];
+    const imageName = image.split(".");
+    await cloudinary.uploader.destroy(imageName[0]);
+  }
+ } catch (error) {
+   return res.status(500).json({
+     success: false,
+     message: "Failed to delete previous image",
+     error
+  })
+  }
+  
+  // saving the new image on cloudinary and getting the link
+  let photoUrl = "";
+  try {
+    const isUploaded = await cloudinary.uploader.upload(photo.tempFilePath);
+    photoUrl = isUploaded.url;
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to upload image",
+      error,
+    });
+  }
+
+  // saving the new link inside the user record
+  userExist.photo = photoUrl;
+
+  try {
+    await userExist.save();
+    return res.status(200).json({
+      success: true,
+      "message":"Profile image updated succesfully"
+    })
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "Failed to save image",
+      error
+    })
+  }
+}

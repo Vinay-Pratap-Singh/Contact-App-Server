@@ -21,7 +21,8 @@ app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
 app.use(fileupload({
-    useTempFiles: true
+    useTempFiles: true,
+    limits:{fileSize:1000000}
 }))
 
 // importing the contact routes
