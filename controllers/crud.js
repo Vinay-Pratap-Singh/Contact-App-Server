@@ -1,9 +1,18 @@
 const User = require("../model/user");
+const cloudinary = require("cloudinary");
 
 // function to add new contact
 exports.addContact = async (req, res) => {
   const id = req.id;
   let { name, phone } = req.body;
+
+  // getting the contact profile image
+  let photo = undefined;
+  try {
+    photo = req.files.photo;
+  } catch (error) {
+    photo = "";
+  }
 
   // checking that the name and number is empty or not
   if (!name || !phone) {
@@ -31,8 +40,24 @@ exports.addContact = async (req, res) => {
     });
   }
 
+  // saving the image on cloudinary
+  let photoUrl = "";
+  if (photo) {
+    // saving the image on cloudinary and getting the link
+    try {
+      const isUploaded = await cloudinary.uploader.upload(photo.tempFilePath);
+      photoUrl = isUploaded.url;
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to upload image",
+        error,
+      });
+    }
+  }
+
   // creating the new contact
-  const newContact = { name, phone };
+  const newContact = { name, phone, photo: photoUrl };
 
   // adding the new contact to the user list
   myUser.contact.push(newContact);
@@ -45,7 +70,15 @@ exports.addContact = async (req, res) => {
       message: "New contact created",
     });
   } catch (error) {
-    res.status(500).json({
+    // if failed to save user then deleting the user picture
+    if (photoUrl) {
+      const url = photoUrl.split("/");
+      const image = url[url.length - 1];
+      const imageName = image.split(".");
+      await cloudinary.uploader.destroy(imageName[0]);
+    }
+
+    return res.status(500).json({
       success: false,
       message: "Failed to save new contact",
     });
@@ -98,6 +131,25 @@ exports.deleteContact = async (req, res) => {
     });
   }
 
+  // getting the image url of cloudinary
+  const photoUrl = newContactArray[index].photo;
+
+  // deleting the image from cloudinary
+  try {
+    if (photoUrl) {
+      const url = photoUrl.split("/");
+      const image = url[url.length - 1];
+      const imageName = image.split(".");
+      await cloudinary.uploader.destroy(imageName[0]);
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete the image",
+      error,
+    });
+  }
+
   // if exist then deleting that one
   newContactArray.splice(index, 1);
 
@@ -127,6 +179,14 @@ exports.updateContact = async (req, res) => {
 
   // getting the id, to update the field
   const { updateId, name, phone } = req.body;
+
+  // getting the contact profile image
+  let photo = undefined;
+  try {
+    photo = req.files.photo;
+  } catch (error) {
+    photo = "";
+  }
 
   // checking that the user exist in db or not
   let myUser;
@@ -166,9 +226,28 @@ exports.updateContact = async (req, res) => {
     });
   }
 
+  // saving the new profile image on cloudinary
+  let photoUrl = "";
+  if (photo) {
+    // saving the image on cloudinary and getting the link
+    try {
+      const isUploaded = await cloudinary.uploader.upload(photo.tempFilePath);
+      photoUrl = isUploaded.url;
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update image",
+        error,
+      });
+    }
+  }
+
   // if exist then updating that one
   newContactArray[index].name = name;
   newContactArray[index].phone = phone;
+  if (photoUrl) {
+    newContactArray[index].photo = photoUrl;
+  }
 
   try {
     // updating the data in database
@@ -183,8 +262,38 @@ exports.updateContact = async (req, res) => {
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: "failed to update contact",
+      message: "Failed to update contact",
       error,
     });
   }
+};
+
+// function for displaying the user data with contacts
+exports.dashboard = async (req, res) => {
+  const id = req.id;
+  let userData;
+
+  try {
+    userData = await User.findById({ _id: id });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "Failed to get user",
+    });
+  }
+
+  if (!userData) {
+    return res.status(400).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  // removing the password from data
+  userData.password = undefined;
+
+  return res.status(200).json({
+    success: true,
+    data: userData,
+  });
 };

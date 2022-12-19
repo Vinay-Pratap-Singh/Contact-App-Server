@@ -4,8 +4,8 @@ const {
   addContact,
   deleteContact,
   updateContact,
+  dashboard,
 } = require("../controllers/crud");
-const { dashboard } = require("../controllers/dashboard");
 const { auth } = require("../middleware/auth");
 const Router = express.Router();
 
