@@ -9,8 +9,10 @@ exports.signup = async (req, res) => {
 
   // getting the profile photo image
   let photo = undefined;
-  if (req.files) {
+  try {
     photo = req.files.photo;
+  } catch (error) {
+    photo = "";
   }
 
   let photoUrl = undefined;
@@ -41,14 +43,11 @@ exports.signup = async (req, res) => {
   }
 
   // check user send profile photo or not
-  if (!photo) {
-    photoUrl = "";
-  } else {
+  if (photo) {
     // saving the image on cloudinary and getting the link
     try {
       const isUploaded = await cloudinary.uploader.upload(photo.tempFilePath);
       photoUrl = isUploaded.url;
-      
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -97,7 +96,7 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   // checking that the fields are empty or not
-  if ((!email, !password)) {
+  if (!email || !password) {
     return res.status(400).json({
       success: false,
       message: "Fields cannot be empty",
@@ -125,7 +124,7 @@ exports.login = async (req, res) => {
 
   // if user exist then checking password
 
-  const passwordMatched = await bcrpyt.compare(password, userExist.password);
+  const passwordMatched = bcrpyt.compareSync(password, userExist.password);
 
   // if password does not match
   if (!passwordMatched) {
@@ -174,9 +173,32 @@ exports.deleteUser = async (req, res) => {
   // getting the id of the user
   const id = req.id;
 
+  // checking that the user exists or not
+  let isUser;
+  try {
+    isUser = await User.findOne({ _id: id });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "User does not exist",
+    });
+  }
+
+  // getting the image url of cloudinary to delete
+  const imageUrl = isUser.photo;
+
   // deleting the user if exist
   try {
-    await User.findByIdAndDelete({ _id: id });
+    // deleting the user image from cloudinary
+    if (imageUrl) {
+      const url = imageUrl.split("/");
+      const image = url[url.length - 1];
+      const imageName = image.split(".");
+      await cloudinary.uploader.destroy(imageName[0]);
+    }
+
+    // deleting the user account
+    await User.deleteOne({ _id: id });
 
     return res.status(200).json({
       success: true,

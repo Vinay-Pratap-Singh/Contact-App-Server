@@ -13,7 +13,7 @@ const Router = express.Router();
 Router.post("/signup", signup);
 Router.post("/login", login);
 Router.get("/logout", auth, logout);
-Router.get("/deleteuser", auth, deleteUser);
+Router.delete("/deleteuser", auth, deleteUser);
 Router.patch("/changepassword", auth, changePassword);
 
 // contacts route

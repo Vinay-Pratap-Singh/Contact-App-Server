@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 require("./database/connect");
 
-// configuring the cloudninary 
+// configuring the cloudinary 
 cloudinary.config({ 
     cloud_name: process.env.CLOUD_NAME, 
     api_key: process.env.API_KEY, 
@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
 app.use(fileupload({
-    useTempFiles:true
+    useTempFiles: true
 }))
 
 // importing the contact routes
