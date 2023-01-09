@@ -6,6 +6,12 @@ exports.addContact = async (req, res) => {
   const id = req.id;
   let { name, phone } = req.body;
 
+  // array of multiple colors
+  const myColors = ["#000000", "#777777", "#ed6868", "#cb68ed", "#537dd1", "#53b8d1", "#53d1ba", "#53d18e", "#59d153", "#d1aa38", "#4f2b72", "#e09147"]
+  
+  // randomly selecting a color for contact logo background
+  const color = myColors[Math.floor(Math.random() * myColors.length)];
+
   // getting the contact profile image
   let photo = undefined;
   try {
@@ -57,7 +63,7 @@ exports.addContact = async (req, res) => {
   }
 
   // creating the new contact
-  const newContact = { name, phone, photo: photoUrl };
+  const newContact = { name, phone, photo: photoUrl, bgColor:color };
 
   // adding the new contact to the user list
   myUser.contact.push(newContact);

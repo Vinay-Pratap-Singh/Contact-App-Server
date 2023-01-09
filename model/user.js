@@ -45,8 +45,11 @@ const userSchema = new mongoose.Schema({
         maxlength: [10, "Length should be 10"],
       },
       photo: {
-        type:"String"
-      }
+        type: "String",
+      },
+      bgColor: {
+        type: "String",
+      },
     },
   ],
 });
