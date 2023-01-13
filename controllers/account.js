@@ -273,19 +273,19 @@ exports.changeUserImage = async (req, res) => {
   const id = req.id;
 
   // getting the new image from user
-  const {photo} = req.files;
+  const { photo } = req.files;
 
   if (!photo) {
     return res.status(400).json({
       success: false,
-      message:"Upload your image"
-    })
+      message: "Upload your image",
+    });
   }
 
   let userExist;
   // finding the user in db
   try {
-    userExist = await User.findOne({ _id:id });
+    userExist = await User.findOne({ _id: id });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -303,23 +303,23 @@ exports.changeUserImage = async (req, res) => {
 
   // getting the old image link to delete
   const oldPhoto = userExist.photo;
-    
+
   // deleting the old image from cloudinary
- try {
-   if (oldPhoto) {
-    const url = oldPhoto.split("/");
-    const image = url[url.length - 1];
-    const imageName = image.split(".");
-    await cloudinary.uploader.destroy(imageName[0]);
+  try {
+    if (oldPhoto) {
+      const url = oldPhoto.split("/");
+      const image = url[url.length - 1];
+      const imageName = image.split(".");
+      await cloudinary.uploader.destroy(imageName[0]);
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete previous image",
+      error,
+    });
   }
- } catch (error) {
-   return res.status(500).json({
-     success: false,
-     message: "Failed to delete previous image",
-     error
-  })
-  }
-  
+
   // saving the new image on cloudinary and getting the link
   let photoUrl = "";
   try {
@@ -340,13 +340,14 @@ exports.changeUserImage = async (req, res) => {
     await userExist.save();
     return res.status(200).json({
       success: true,
-      "message":"Profile image updated succesfully"
-    })
+      message: "Profile image updated succesfully",
+      imageUrl: photoUrl,
+    });
   } catch (error) {
     return res.status(400).json({
       success: false,
       message: "Failed to save image",
-      error
-    })
+      error,
+    });
   }
-}
+};
