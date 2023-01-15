@@ -19,7 +19,7 @@ Router.patch("/changeuserimage", auth, changeUserImage);
 
 // contacts route
 Router.post("/addcontact", auth, addContact);
-Router.delete("/deletecontact", auth, deleteContact);
+Router.post("/deletecontact", auth, deleteContact);
 Router.patch("/updatecontact", auth, updateContact);
 Router.get("/dashboard", auth, dashboard);
 
