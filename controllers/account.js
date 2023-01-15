@@ -351,3 +351,58 @@ exports.changeUserImage = async (req, res) => {
     });
   }
 };
+
+exports.removeProfile = async (req, res) => {
+  // getting the id of the user
+  const {id} = req.body;
+
+  // checking that the user exists or not
+  let isUser;
+  try {
+    isUser = await User.findOne({ _id: id });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "User does not exist",
+    });
+  }
+
+  // if user does not exist
+  if (!isUser) {
+    return res.status(200).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  // getting the image url of cloudinary to delete
+  const imageUrl = isUser.photo;
+
+  // deleting the user profile image if user exists
+  try {
+    // deleting the user image from cloudinary
+    if (imageUrl) {
+      const url = imageUrl.split("/");
+      const image = url[url.length - 1];
+      const imageName = image.split(".");
+      await cloudinary.uploader.destroy(imageName[0]);
+    }
+
+    // changing the value of photo
+    isUser.photo = "";
+
+    // saving the updated data in database
+    await isUser.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile picture removed succesfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to remove profile picture",
+      error,
+    });
+  }
+};
