@@ -143,7 +143,8 @@ exports.login = async (req, res) => {
   res.status(200).cookie("token", token, {
     httpOnly: true,
     expires: new Date(Date.now() + 1000 * 60 * 120),
-    sameSite:"none"
+    sameSite: "none",
+    secure:true
   });
 
   // removing the password before sending the data
