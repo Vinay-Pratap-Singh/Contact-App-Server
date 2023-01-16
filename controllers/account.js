@@ -144,7 +144,7 @@ exports.login = async (req, res) => {
     httpOnly: true,
     expires: new Date(Date.now() + 1000 * 60 * 120),
     sameSite: "none",
-    secure:true
+    secure:false
   });
 
   // removing the password before sending the data
