@@ -18,7 +18,10 @@ cloudinary.config({
   });
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: ['https://contact-app-harvi.netlify.app/'],
+    credentials:true
+}));
 app.use(cookieParser());
 app.use(fileupload({
     useTempFiles: true,
