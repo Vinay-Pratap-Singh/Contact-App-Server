@@ -139,15 +139,6 @@ exports.login = async (req, res) => {
     expiresIn: "2hr",
   });
 
-  // sending the token to user in cookie
-  res.status(200).cookie("token", token, {
-    httpOnly: false,
-    expires: new Date(Date.now() + 1000 * 60 * 120),
-    sameSite: "none",
-    secure: true,
-    signed:true
-  });
-
   // removing the password before sending the data
   userExist.password = undefined;
 
@@ -155,6 +146,7 @@ exports.login = async (req, res) => {
     success: true,
     message: "Login Succesfully",
     data: userExist,
+    token
   });
 };
 

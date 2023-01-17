@@ -22,7 +22,7 @@ app.use(cors({
     origin: process.env.CORS_DOMAIN,
     credentials:true
 }));
-app.use(cookieParser());
+app.use(cookieParser(process.env.SECRET_KEY));
 app.use(fileupload({
     useTempFiles: true,
     limits:{fileSize:1000000}
