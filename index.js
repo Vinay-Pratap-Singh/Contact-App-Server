@@ -19,7 +19,7 @@ cloudinary.config({
 
 app.use(express.json());
 app.use(cors({
-    origin: 'https://contact-app-harvi.netlify.app',
+    origin: '*',
     credentials:true
 }));
 app.use(cookieParser());
