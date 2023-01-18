@@ -18,11 +18,8 @@ cloudinary.config({
   });
 
 app.use(express.json());
-app.use(cors({
-    origin: process.env.CORS_DOMAIN,
-    credentials:true
-}));
-app.use(cookieParser(process.env.SECRET_KEY));
+app.use(cors());
+app.use(cookieParser());
 app.use(fileupload({
     useTempFiles: true,
     limits:{fileSize:1000000}
